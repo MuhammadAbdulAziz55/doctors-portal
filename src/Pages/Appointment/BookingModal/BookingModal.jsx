@@ -1,7 +1,11 @@
 import { format } from "date-fns";
-import React from "react";
+import React, { useContext } from "react";
+import { AuthContext } from "../../../context/AuthContext";
+import { toast } from "react-hot-toast";
 
-const BookingModal = ({ treatment, selectedDate, setTreatment }) => {
+const BookingModal = ({ treatment, selectedDate, setTreatment, refetch }) => {
+  const { user } = useContext(AuthContext);
+
   const { treatmentName, slots } = treatment;
   const date = format(selectedDate, "PP");
 
@@ -21,8 +25,25 @@ const BookingModal = ({ treatment, selectedDate, setTreatment }) => {
       email,
       phone,
     };
-    console.log(booking);
-    setTreatment(null);
+
+    fetch("http://localhost:5000/bookings", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(booking),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        // console.log(data)
+        if (data.acknowledged) {
+          toast.success("Booking confirmed");
+          setTreatment(null);
+          refetch();
+        } else {
+          toast.error(data.message);
+        }
+      });
   };
   return (
     <>
@@ -42,7 +63,7 @@ const BookingModal = ({ treatment, selectedDate, setTreatment }) => {
               type="text"
               disabled
               value={date}
-              class="input input-bordered w-full  mb-4 mt-4 "
+              className="input input-bordered w-full  mb-4 mt-4 "
             />
             <select
               name="slot"
@@ -57,23 +78,27 @@ const BookingModal = ({ treatment, selectedDate, setTreatment }) => {
             <input
               name="name"
               type="text"
+              value={user?.displayName}
+              disabled
               placeholder="Type your name"
-              class="input input-bordered w-full  mb-4"
+              className="input input-bordered w-full  mb-4"
             />
             <input
               name="email"
               type="email"
+              value={user?.email}
+              disabled
               placeholder="Type your  email"
-              class="input input-bordered w-full  mb-4"
+              className="input input-bordered w-full  mb-4"
             />
 
             <input
               name="phone"
               type="text"
               placeholder="Type your phone"
-              class="input input-bordered w-full  mb-4"
+              className="input input-bordered w-full  mb-4"
             />
-            <input type="submit" class="btn btn-accent w-full  mb-4" />
+            <input type="submit" className="btn btn-accent w-full  mb-4" />
           </form>
         </div>
       </div>

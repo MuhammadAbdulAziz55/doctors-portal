@@ -3,6 +3,7 @@ import { auth, googleProvider } from "../firebase/firebase.config";
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
@@ -30,6 +31,11 @@ export const AuthContextProvider = ({ children }) => {
     return signInWithEmailAndPassword(auth, email, password);
   };
 
+  const resetPassword = (email) => {
+    setLoading(true);
+    return sendPasswordResetEmail(auth, email);
+  };
+
   const updateUserProfile = (profile) => {
     return updateProfile(auth.currentUser, profile);
   };
@@ -41,7 +47,7 @@ export const AuthContextProvider = ({ children }) => {
 
   useEffect(() => {
     const unSubscribe = onAuthStateChanged(auth, (currentUser) => {
-      console.log(currentUser);
+      // console.log(currentUser);
       setUser(currentUser);
       setLoading(false);
     });
@@ -53,7 +59,7 @@ export const AuthContextProvider = ({ children }) => {
     createUser,
     loginWithGoogle,
     login,
-
+    resetPassword,
     updateUserProfile,
     logOut,
   };
